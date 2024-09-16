@@ -1,51 +1,25 @@
-# main.tf
-
 terraform {
-  required_providers {                     #### ansible provider
-    ansible = {
-      version = "~> 0.0.1"
-      source  = "terraform-ansible.com/ansibleprovider/ansible"
+  cloud {
+    organization = "Your_TF_Cloud_Organization"
+    workspaces {
+      name = "example-ansible-hello-world"
     }
-   # aws = {
-   #   source  = "hashicorp/aws"
-   #   version = "~> 4.0"
-   # }
-  }
-}
-provider "tls" {}
-
-provider "local" {}
-
-provider "null" {}
-
-provider "ssh" {
-  host        = var.vm_ip_address
-  user        = var.ssh_user
-  private_key = file(var.private_key_path)
-}
-
-resource "tls_private_key" "example" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-# Execute the yum install command on the on-prem VM
-resource "null_resource" "install_wget" {
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      host        = var.vm_ip_address
-      user        = var.ssh_user
-      private_key = file(var.private_key_path)
-    }
-
-    inline = [
-      "sudo yum install -y wget"
-    ]
   }
 }
 
-# Output the result
-output "ssh_host" {
-  value = var.vm_ip_address
+provider "tfe" {
+  hostname = "app.terraform.io"
+  token    = var.tfe_token
+}
+
+# Null resource to run the Ansible playbook using local-exec
+resource "null_resource" "ansible_hello_world" {
+  provisioner "local-exec" {
+    command = "ansible-playbook ./Ansible/hello_world.yml"
+  }
+}
+
+# Ensure Ansible is only run once
+lifecycle {
+  create_before_destroy = true
 }
