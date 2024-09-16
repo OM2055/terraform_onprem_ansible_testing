@@ -20,6 +20,6 @@ resource "null_resource" "ansible_hello_world" {
 }
 
 # Ensure Ansible is only run once
-lifecycle {
-  create_before_destroy = true
-}
+#lifecycle {
+#  create_before_destroy = true
+# }
